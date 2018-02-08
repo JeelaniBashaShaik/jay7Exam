@@ -1,0 +1,18 @@
+.question{
+    margin-left: 5px;
+    margin-right: 5px;
+
+}
+
+.review{
+    background-color: red !important;
+}
+
+.answered{
+    background-color:green !important;
+}
+
+.unanswered{
+    background-color:white !important;
+}
+

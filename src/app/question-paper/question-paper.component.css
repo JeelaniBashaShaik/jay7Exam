@@ -1,0 +1,29 @@
+.example-radio-group {
+    display: inline-flex;
+    flex-direction: column;
+  }
+  
+  .example-radio-button {
+    margin: 5px;
+  }
+
+  .question{
+    margin-left: 5px;
+    margin-right: 5px;
+
+}
+
+.review{
+    background-color:black !important;
+}
+
+.answered{
+    background-color:green !important;
+}
+
+.unanswered{
+    background-color:lightblue !important;
+}
+.skipped{
+    background-color:red !important;
+}

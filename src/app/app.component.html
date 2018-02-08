@@ -1,0 +1,34 @@
+<!--The content below is only a placeholder and can be replaced.-->
+<!-- <h1 *ngIf="authService.user | async">Welcome {{ (authService.user | async)?.displayName }}!</h1> -->
+
+<mat-toolbar color="primary">
+  <mat-toolbar-row>
+    <span *ngIf="authService.user | async">{{ (authService.user | async)?.displayName }}</span>
+    <span class="example-spacer"></span>
+    <button mat-raised-button color="warn" (click)="logout()" *ngIf="authService.user | async">
+        Logout
+      </button>
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<div *ngIf="!(authService.user | async)">
+
+
+  <button mat-raised-button color="primary" (click)="login1()">
+    Login
+  </button>
+</div>
+
+
+<!-- 
+<button mat-raised-button color="secondary" (click)="add()" *ngIf="authService.user | async">
+  add
+</button>
+<ul>
+  <li *ngFor="let item of items | async">
+     {{ item }}
+  </li>
+</ul> -->
+
+<router-outlet></router-outlet>
+

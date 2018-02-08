@@ -1,0 +1,19 @@
+.example-spacer {
+    flex: 1 1 auto;
+  }
+/* 
+  exports.insertIntoDB = functions.https.onRequest((req, res) => {
+    const userKey = req.body.userKey;
+    const answers = req.body.answers;
+    console.log(req.body);
+    admin.database().ref('/users_List/'+userKey).push({answers: answers}).then(snapshot => {
+        res.redirect(303, snapshot.ref);
+    })
+  });
+  
+  
+  exports.convertToUppercase = functions.database.ref('/users_List/{pushId}/answers').onWrite(event => {
+    const text = event.data.val();
+    const uppercaseText = text.toUpperCase();
+    return event.data.ref.parent.child('uppercaseText').set(uppercaseText);
+  }); */

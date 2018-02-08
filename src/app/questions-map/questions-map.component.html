@@ -1,0 +1,12 @@
+
+        <mat-card style="margin-left:1%;margin-right:1%">
+            <span>Question Map</span>
+            <hr/>
+            
+                <span *ngFor="let question of questions | async" class="question">
+                    <button  mat-mini-fab [class.review]="question.status == review" [class.answered]="question.status == answered" [class.unanswered]="question.status == 'null'" (click)="selectQuestion(question)">{{question.questionNumber}}</button>
+               </span>
+            
+          </mat-card>
+  
+
