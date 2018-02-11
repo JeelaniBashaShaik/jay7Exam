@@ -18,6 +18,7 @@ import { QuestionsMapComponent } from './questions-map/questions-map.component';
 import { QuestionPaperComponent } from './question-paper/question-paper.component'
 import { NgxEchartsModule } from 'ngx-echarts';
 import { EchartsComponent } from './echarts/echarts.component';
+import { ChartService } from './chart.service';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,7 @@ import { EchartsComponent } from './echarts/echarts.component';
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,NgxEchartsModule
   ],
-  providers: [AuthService,AngularFireDatabase],
+  providers: [AuthService,AngularFireDatabase,ChartService],
   schemas:[CUSTOM_ELEMENTS_SCHEMA,NO_ERRORS_SCHEMA],
   bootstrap: [AppComponent],
   exports:[QuestionsComponent]

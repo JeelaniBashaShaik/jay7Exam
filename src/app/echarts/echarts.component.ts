@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-
+import { ChartService } from './../chart.service';
 @Component({
   selector: 'app-echarts',
   templateUrl: './echarts.component.html',
@@ -7,45 +7,63 @@ import { Component, OnInit } from '@angular/core';
 })
 export class EchartsComponent implements OnInit {
 
-  constructor() { }
+  constructor(private _chartService:ChartService) { }
 
-  options:any;
+  pieOptions:any;
+  barOptions:any;
+  pieData:any;
+  barData:any;
   ngOnInit() {
-
-    this.options = {
-      title: {
-        text: 'Nightingale\'s Rose Diagram',
-        subtext: 'Mocking Data',
-        x: 'center'
-      },
-      tooltip: {
-        trigger: 'item',
-        formatter: '{a} <br/>{b} : {c} ({d}%)'
-      },
-      legend: {
-        x: 'center',
-        y: 'bottom',
-        data: ['rose1', 'rose2', 'rose3', 'rose4', 'rose5', 'rose6', 'rose7', 'rose8']
-      },
-      calculable: true,
-      series: [
-        {
-          name: 'area',
-          type: 'pie',
-          radius: [30, 110],
-          roseType: 'area',
-          data: [
-            { value: 10, name: 'rose1' },
-            { value: 5, name: 'rose2' },
-            { value: 15, name: 'rose3' },
-            { value: 25, name: 'rose4' },
-            { value: 20, name: 'rose5' },
-            { value: 35, name: 'rose6' },
-            { value: 30, name: 'rose7' },
-            { value: 40, name: 'rose8' }
-          ]
-        }
-      ]
-    };
+     this.drawBarChart();
+     this.drawPieChart();
   }  
+
+  drawPieChart(){
+    this._chartService.fetchPieData().subscribe(data=>{
+      console.log(data);
+      this.pieData = data;
+      this.pieOptions = {
+      
+        tooltip : {
+            trigger: 'item',
+            formatter: "{a} <br/>{b} : {c} ({d}%)"
+        },
+        legend: {
+            orient: 'vertical',
+            left: 'left',
+            data: ['Google','Amazon','Microsoft','SpaceX','Tinder']
+        },
+        series : [
+            {
+                name: 'Website',
+                type: 'pie',
+                radius : '55%',
+                center: ['50%', '60%'],
+                data:this.pieData
+                
+            }
+        ]
+    };
+    
+    })
+  }
+
+  drawBarChart(){
+    this._chartService.fetchBarData().subscribe(data=>{
+      this.barData = data;
+      this.barOptions = {
+        xAxis: {
+            type: 'category',
+            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [{
+          data: this.barData,
+            type: 'bar'
+        }]
+    };
+    })
+  }
 }
