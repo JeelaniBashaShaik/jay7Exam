@@ -1,9 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,Inject } from '@angular/core';
 import { AngularFireDatabase,AngularFireList } from 'angularfire2/database';
 import { Observable } from 'rxjs/Observable';
 import {MatSnackBar} from '@angular/material';
 import { AuthService } from './../auth-service';
 import { AngularFireAuth } from 'angularfire2/auth';
+import { ExamService } from './../exam.service' ;
+import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
+import { Router,ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-question-paper',
@@ -12,44 +15,59 @@ import { AngularFireAuth } from 'angularfire2/auth';
 })
 export class QuestionPaperComponent implements OnInit {
 
-  constructor(private db: AngularFireDatabase,public snackBar: MatSnackBar,public afAuth:AngularFireAuth) { 
-    this.questions = this.db.list('questions').valueChanges();
-    this.questions.subscribe(data=>{this.selectedQuestion=data[0];
-    console.log(data)});
-    let x = afAuth.authState;
-    x.subscribe(data=>{
-      this.userEmail=data.email;
-      var query = this.db.database.ref('/users_List').orderByChild("email").equalTo(this.userEmail).once("value", (snapshot)=> {
-        var userData = snapshot.val(); 
-         // //console.log(userData);
-          this.userKey = Object.keys(userData)[0];
-       ////console.log(Object.keys(userData));
-       this.answersPath = this.db.list('/users_List/'+Object.keys(userData)+'/answers');
-      
-       })
-    });
- /*    var query = this.db.database.ref('/users_List').orderByChild("email").equalTo(this.userEmail).once("value", (snapshot)=> {
-      var userData = snapshot.val(); 
-       // //console.log(userData);
-        this.userKey = Object.keys(userData)[0];
-     ////console.log(Object.keys(userData));
-     this.answersPath = this.db.list('/users_List/'+Object.keys(userData)+'/answers');
-    
-     }) */
+  private sub: any;
+
+  constructor(private db: AngularFireDatabase,public snackBar: MatSnackBar,public afAuth:AngularFireAuth,private _examService:ExamService,public dialog: MatDialog,private route: ActivatedRoute) { 
   }
   userEmail:string;
   userKey:string;
   answersPath:any;
-  questions:Observable<any>;
+  questions=[];
   selectedQuestion:any;
   answerKeyMap = new Map();
   totalQuestions:number=0;
   progress:number;
+  result = {};
+  questionPaper:string;
+
+  openDialog(): void {
+    let dialogRef = this.dialog.open(DialogOverviewExampleDialog, {
+      width: '400px',
+      //data: { correctCount:'asfas', animal: 'asdfg' }
+      data: this.result
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+
+    });
+  }
+
+
   ngOnInit() {
-    this.questions.subscribe(data=>data.map(x=>this.totalQuestions++));
-   // this.selectedQuestion = this.questions[0];
-    //console.log(this.selectedQuestion);
-   
+  //  this.questions.subscribe(data=>data.map(x=>this.totalQuestions++));
+  this.sub = this.route.params.subscribe(params => {
+    console.log(params['id'],"id"); 
+    this.questionPaper = params['id'];
+
+    this._examService.fetchAllQuestions(this.questionPaper).subscribe(data=>{
+      // console.log(data);
+       let tempData = data;
+       tempData.map(row=>{
+         row['options'] = [row['option1'],row['option2'],row['option3'],row['option4']];
+         row['status'] = "unanswered";
+         row['selectedOption'] = null;
+         this.totalQuestions++;
+       })
+       this.questions = [...tempData];
+       this.selectedQuestion = this.questions[0];
+       console.log(this.questions);
+     });
+
+ });
+
+    
+    
+
   }
 
   selectQuestion(question){
@@ -57,53 +75,37 @@ export class QuestionPaperComponent implements OnInit {
     this.selectedQuestion = question;
   }
 
-  questionSelected(e){
-  //  console.log(e);
-    this.selectedQuestion = e;
-    console.log(this.selectedQuestion);
-  }
-
-  selectedOption(e){
-    this.answerKeyMap.set(e.questionNumber,e.selectedOption);
-    console.log(this.answerKeyMap);
-  }
-
   update(option,questionNumber){
-    let entry = [questionNumber,option]
-    this.answerKeyMap.set(questionNumber,option);
-    console.log(this.answerKeyMap);
-    //console.log(this.answerKeyMap.size);
-    //console.log(this.totalQuestions);
-    this.progress = Math.round((this.answerKeyMap.size/this.totalQuestions) * 100);
+  this.resultSet.add(questionNumber);
+    this.progress = Math.round((this.resultSet.size/this.totalQuestions) * 100);
     console.log(this.progress);
   }
-
+resultToSave = [];
+resultSet = new Set();
   saveOption(question){
-    //console.log(question);
-    console.log(this.selectedQuestion);
-    if((this.selectedQuestion.selectedOption == null) || (this.selectedQuestion.selectedOption == ' ')){
+    if(this.selectedQuestion.selectedOption == null){
       this.snackBar.open('you are skipping this question without answering', '', {
-        duration: 1000
+        duration: 2000
       });
       this.selectedQuestion.status = 'skipped';
     }else{
       this.selectedQuestion.status = 'answered';
-      this.update(this.selectedQuestion.selectedOption,this.selectedQuestion.questionNumber);
+      this.update(this.selectedQuestion.selectedOption,this.selectedQuestion.questionId);
     }
-    
+    //console.log(this.selectedQuestion);
    }
 
    reviewOption(question){
     //console.log(question);
     console.log(this.selectedQuestion);
-    if((this.selectedQuestion.selectedOption == null) || (this.selectedQuestion.selectedOption == ' ')){
+    if(this.selectedQuestion.selectedOption == null){
       this.snackBar.open('you are skipping this question without answering', '', {
-        duration: 1000
+        duration: 2000
       });
       this.selectedQuestion.status = 'skipped';
     }else{
       this.selectedQuestion.status = 'review';
-      this.update(this.selectedQuestion.selectedOption,this.selectedQuestion.questionNumber);
+      this.update(this.selectedQuestion.selectedOption,this.selectedQuestion.questionId);
     }
     
    }
@@ -111,12 +113,12 @@ export class QuestionPaperComponent implements OnInit {
    clearResponse(question){
     this.selectedQuestion.selectedOption = null;
     this.selectedQuestion.status='unanswered';
-    if(this.answerKeyMap.has(this.selectedQuestion.questionNumber)){
-      this.answerKeyMap.delete(this.selectedQuestion.questionNumber);
-    }
-    this.progress = Math.round((this.answerKeyMap.size/this.totalQuestions) * 100);
-    console.log(this.progress);
-    console.log(this.answerKeyMap);
+    /* this.resultToSave = this.resultToSave.filter(row=>{
+      console.log(row['questionId'],this.selectedQuestion['questionId']);
+      row['questionId'] == this.selectedQuestion['questionId'];
+    }) */
+    this.resultSet.delete(this.selectedQuestion.questionId);
+    this.progress = Math.round((this.resultSet.size/this.totalQuestions) * 100);
    }
 
   /*  previous(question){
@@ -128,15 +130,55 @@ export class QuestionPaperComponent implements OnInit {
    } */
 
    submit(){
-     //console.log(this.answerKeyMap);
-     let y = {};
-     this.answerKeyMap.forEach((v,k)=>{
-      y[k]=v;
+     this.resultToSave = [];
+     this.questions.map(question=>{
+       let x = {questionId:question.questionId,answer:question.selectedOption};
+       this.resultToSave = [...this.resultToSave,x];
      })
-     let x = {questionPaperId:'abc123',answers:y};
-     //console.log(y);
-     console.log(this.userKey);
-     this.answersPath.push(y).then(data=>console.log(data)).catch(err=>console.log(err));
-     
+     console.log(this.questionPaper,"questionPaper");
+     this._examService.validateResult(this.resultToSave,this.questionPaper).subscribe(data=>{
+       console.log(data);
+       this.result = data;
+       this.openDialog();
+     })
    }
+}
+
+
+@Component({
+  selector: 'dialog-overview-example-dialog',
+  template:  `
+  <h2 mat-dialog-title>Result</h2>
+  <hr/>
+  <mat-dialog-content >
+    <p>Correct Count : <span style="color:green">{{data.correctCount}}</span>,</p>
+    <p>Wrong Count   :<span style="color:red">{{data.wrongCount}}</span>,</p>
+    <p>Skipped Count : <span style="color:black">{{data.skippedCount}}</span></p>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions>
+      <button style="float:right" class="mat-raised-button"(click)="close()">Close</button>
+  </mat-dialog-actions>`,
+})
+export class DialogOverviewExampleDialog {
+
+  constructor(
+    public dialogRef: MatDialogRef<DialogOverviewExampleDialog>,
+    private router: Router,
+    @Inject(MAT_DIALOG_DATA) public data: any) { }
+
+  onNoClick(): void {
+    //this.dialogRef.close();
+  }
+
+  close(){
+    this.dialogRef.close();
+    this.router.navigateByUrl('/exams');
+    
+  }
+
+  save(){
+    this.dialogRef.close();
+  }
+
 }

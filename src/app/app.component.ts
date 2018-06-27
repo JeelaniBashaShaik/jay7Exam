@@ -3,6 +3,7 @@ import { AuthService } from './auth-service';
 import { AngularFireDatabase,AngularFireList } from 'angularfire2/database';
 import { Observable } from 'rxjs/Observable';
 import { QuestionModel } from './shared/questions';
+import { Router } from '@angular/router';
 
 
 
@@ -15,7 +16,7 @@ export class AppComponent {
 
   items: Observable<any[]>;
   questionsRef:AngularFireList<any>;
-  constructor(public authService: AuthService,db: AngularFireDatabase) {
+  constructor(public authService: AuthService,db: AngularFireDatabase,private router:Router) {
     this.items = db.list('items').valueChanges();
     this.questionsRef = db.list('questions');
   }
@@ -41,4 +42,5 @@ export class AppComponent {
       x.options = ['15','25','6'];
       this.questionsRef.push(x).then(data=>console.log(data));
     }
+
 }

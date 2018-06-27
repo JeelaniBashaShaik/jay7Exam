@@ -17,8 +17,10 @@ import { QuestionsComponent } from './questions/questions.component';
 import { QuestionsMapComponent } from './questions-map/questions-map.component';
 import { QuestionPaperComponent } from './question-paper/question-paper.component'
 import { NgxEchartsModule } from 'ngx-echarts';
-import { EchartsComponent } from './echarts/echarts.component';
-import { ChartService } from './chart.service';
+import { ExamService } from './exam.service';
+import { DialogOverviewExampleDialog} from './question-paper/question-paper.component';
+import { ExamsListComponent } from './exams-list/exams-list.component';
+
 
 @NgModule({
   declarations: [
@@ -26,7 +28,9 @@ import { ChartService } from './chart.service';
     QuestionsComponent,
     QuestionsMapComponent,
     QuestionPaperComponent,
-    EchartsComponent
+    DialogOverviewExampleDialog,
+    ExamsListComponent
+    
   ],
   imports: [
     BrowserModule,
@@ -38,9 +42,10 @@ import { ChartService } from './chart.service';
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,NgxEchartsModule
   ],
-  providers: [AuthService,AngularFireDatabase,ChartService],
+  providers: [AuthService,AngularFireDatabase, ExamService],
   schemas:[CUSTOM_ELEMENTS_SCHEMA,NO_ERRORS_SCHEMA],
   bootstrap: [AppComponent],
-  exports:[QuestionsComponent]
+  exports:[QuestionsComponent],
+  entryComponents: [DialogOverviewExampleDialog]
 })
 export class AppModule { }

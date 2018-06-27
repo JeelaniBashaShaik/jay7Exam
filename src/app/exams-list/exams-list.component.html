@@ -1,0 +1,18 @@
+
+
+<mat-card>
+  <mat-card class="example-card" *ngFor="let exam of exams">
+    <mat-card-header>
+      <div mat-card-avatar class="example-header-image"></div>
+      <mat-card-title (click)="gotoRoute(exam.questionPaper)">{{exam.title}}</mat-card-title>
+      <mat-card-subtitle>{{exam.questionDesc}}</mat-card-subtitle>
+    </mat-card-header>
+   <!--  <img mat-card-image src="/assets/"+ alt="Photo of a Shiba Inu"> -->
+    <mat-card-content>
+      <!-- <h6>
+        {{exam}}
+      </h6> -->
+    </mat-card-content>
+  
+  </mat-card>
+</mat-card>
